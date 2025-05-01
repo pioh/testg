@@ -1,13 +1,15 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.0.0-RC2'
-	id 'io.spring.dependency-management' version '1.1.0'
-	id 'org.graalvm.buildtools.native' version '0.9.17'
+	id 'org.springframework.boot' version '3.4.5'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.graalvm.buildtools.native' version '0.10.6'
 }
 
 group = 'com.srg'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
+java {
+	sourceCompatibility = JavaVersion.VERSION_24
+}
 
 configurations {
 	compileOnly {
@@ -25,29 +27,71 @@ tasks.withType(JavaExec) {
 	jvmArgs += '--enable-preview'
 }
 
+// Настройка для bootRun задачи
+bootRun {
+	// Это свойство должно предотвратить раннее завершение
+	systemProperty 'spring.main.web-application-type', 'servlet'
+}
+
 repositories {
 	mavenCentral()
-	maven { url 'https://repo.spring.io/milestone' }
-	maven { url 'https://repo.spring.io/snapshot' }
+	maven { url = uri("https://repo.spring.io/milestone") }
+	maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
+	compileOnly 'org.projectlombok:lombok:1.18.38'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok:1.18.38'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
+	jvmArgs += "--enable-preview"
 }
-nativeBuild {
-	javaLauncher = javaToolchains.launcherFor {
-		languageVersion = JavaLanguageVersion.of(19)
-		jvmArgs.add('--enable-preview')
-		vendor = JvmVendorSpec.matching("GraalVM")
 
+// Настройка Native Image
+graalvmNative {
+	metadataRepository {
+		enabled = true
+	}
+	binaries {
+		main {
+			imageName = 'test-app'
+			buildArgs.add('--no-fallback')
+			
+			// Высокооптимизированная сборка
+			buildArgs.add('-O2') // Оптимизация для производительности
+			
+			// Увеличиваем параллелизм - используем форму с пробелом
+			// buildArgs.add('--parallel-build')
+			// buildArgs.add(Runtime.runtime.availableProcessors().toString())
+			
+			// Добавляем отладочную информацию
+			buildArgs.add('-H:+ReportExceptionStackTraces')
+			
+			// Рекомендованные оптимизации
+			buildArgs.add('--gc=G1') // G1GC вместо Serial GC для лучшей производительности
+			buildArgs.add('-march=native') // Оптимизация под конкретный процессор
+			// buildArgs.add('-Xmx8g') // Установка максимального размера кучи для нативной сборки (8GB)
+		}
 	}
 }
+
+// Активируем параллельное выполнение задач 
+tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
+    options.fork = true
+    // Не указываем конкретный путь к javac, пусть Gradle сам найдет
+    options.forkOptions.jvmArgs = ['--enable-preview']
+}
+
+// Устанавливаем максимальное количество воркеров для Gradle
+gradle.startParameter.maxWorkerCount = Runtime.runtime.availableProcessors()
+
+// Добавляем настройку для включения полной обработки аннотаций
+compileJava {
+    options.compilerArgs += ["-proc:full"]
+}
+

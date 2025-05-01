@@ -1,0 +1,15 @@
+{
+  "name": "performance-dashboard",
+  "version": "1.0.0",
+  "description": "Дашборд для визуализации результатов тестов производительности",
+  "main": "main.js",
+  "scripts": {
+    "start": "bun main.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bun": "^1.0.11",
+    "csv-parse": "^5.5.0"
+  }
+}

@@ -1,0 +1,373 @@
+:root {
+  --primary-color: #0d6efd;
+  --primary-light: #cfe2ff;
+  --secondary-color: #6c757d;
+  --success-color: #198754;
+  --success-light: #d1e7dd;
+  --warning-color: #ffc107;
+  --warning-light: #fff3cd;
+  --danger-color: #dc3545;
+  --danger-light: #f8d7da;
+  --info-color: #0dcaf0;
+  --info-light: #cff4fc;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+
+  /* Типы приложений */
+  --java-color: #5382a1;
+  --go-color: #00add8;
+  --graalvm-color: #e76f00;
+}
+
+body {
+  background-color: #f5f7fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+}
+
+.card {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
+}
+
+.card-header h5 {
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+.shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.table thead th {
+  font-weight: 600;
+  color: #444;
+  background-color: #f8f9fa;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  padding: 8px 10px !important;
+}
+
+.container-fluid {
+  padding: 15px 30px;
+}
+
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 10px;
+  }
+}
+
+/* Метрики */
+.metric-card {
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  height: 100%;
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.metric-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metric-info {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+}
+
+.metric-trend {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  margin-left: 5px;
+}
+
+.metric-trend-up {
+  color: var(--success-color);
+}
+
+.metric-trend-down {
+  color: var(--danger-color);
+}
+
+/* Типы приложений */
+.app-java {
+  border-left: 3px solid var(--java-color);
+}
+
+.app-go {
+  border-left: 3px solid var(--go-color);
+}
+
+.app-graalvm {
+  border-left: 3px solid var(--graalvm-color);
+}
+
+/* Аномалии */
+.anomaly-card {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border-left: 4px solid var(--warning-color);
+  background-color: var(--warning-light);
+  font-size: 0.9rem;
+}
+
+.anomaly-severe {
+  border-left-color: var(--danger-color);
+  background-color: var(--danger-light);
+}
+
+.anomaly-interesting {
+  border-left-color: var(--info-color);
+  background-color: var(--info-light);
+}
+
+.anomaly-positive {
+  border-left-color: var(--success-color);
+  background-color: var(--success-light);
+}
+
+.anomaly-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+}
+
+.anomaly-description {
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+}
+
+.anomaly-details {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+}
+
+/* Анимации для обновления */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 0.8s ease;
+}
+
+/* Стили для фильтров и селекторов */
+.form-select-sm {
+  min-width: 120px;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Увеличение размера графиков ресурсов */
+.card:has(#resourceUsageChart) .card-body {
+  height: 400px;
+}
+
+#resourceUsageChart {
+  height: 370px !important;
+}
+
+/* Адаптивность для графиков */
+canvas {
+  max-width: 100%;
+  height: 320px !important;
+}
+
+/* Стили для информации об обновлении */
+.last-updated {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* Стили для подсветки таблицы */
+.table-highlight-high {
+  background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.table-highlight-medium {
+  background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.table-warning {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+.table-danger {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+/* Стили для ячеек таблицы */
+.cell-best {
+  background-color: rgba(25, 135, 84, 0.25) !important;
+  font-weight: bold;
+}
+
+.cell-good {
+  background-color: rgba(25, 135, 84, 0.15) !important;
+}
+
+.cell-worst {
+  background-color: rgba(220, 53, 69, 0.25) !important;
+  font-weight: bold;
+}
+
+.cell-bad {
+  background-color: rgba(220, 53, 69, 0.15) !important;
+}
+
+.group-separator td {
+  border-top: 2px solid #dee2e6 !important;
+}
+
+/* Компактность таблицы */
+#resultsTable {
+  font-size: 0.85rem;
+}
+
+#resultsTable th,
+#resultsTable td {
+  padding: 0.4rem 0.5rem;
+}
+
+/* Стили для тепловой карты */
+#heatmapContainer {
+  width: 100%;
+  height: 500px;
+  overflow: auto;
+}
+
+/* Улучшения для DataTables */
+.dataTables_wrapper .dataTables_filter {
+  margin-bottom: 10px;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.dataTables_wrapper .dataTables_info {
+  padding-top: 10px;
+  font-size: 0.85rem;
+}
+
+.dataTables_scrollBody {
+  min-height: 400px;
+  max-height: 600px;
+}
+
+/* Настройка колонок */
+.column-toggle {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.column-toggle label {
+  margin-left: 8px;
+  margin-bottom: 0;
+  user-select: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Группировка по типу приложения */
+.app-type-header {
+  font-weight: 600;
+  color: var(--dark-color);
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.app-type-java {
+  color: var(--java-color);
+}
+
+.app-type-go {
+  color: var(--go-color);
+}
+
+.app-type-graalvm {
+  color: var(--graalvm-color);
+}
+
+/* Кнопки фильтрации типа */
+.btn-outline-secondary.active[data-type="java"] {
+  background-color: var(--java-color);
+  border-color: var(--java-color);
+  color: white;
+}
+
+.btn-outline-secondary.active[data-type="go"] {
+  background-color: var(--go-color);
+  border-color: var(--go-color);
+  color: white;
+}
+
+.btn-outline-secondary.active[data-type="graalvm"] {
+  background-color: var(--graalvm-color);
+  border-color: var(--graalvm-color);
+  color: white;
+}
+
+/* Компактный интерфейс */
+.py-3 {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+.mb-4 {
+  margin-bottom: 1rem !important;
+}
+
+header.py-3 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}

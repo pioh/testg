@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Анализ производительности приложений</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"
+    />
+    <link rel="stylesheet" href="/public/styles.css" />
+  </head>
+  <body>
+    <div class="container-fluid">
+      <header class="py-3 border-bottom mb-3">
+        <div class="d-flex align-items-center">
+          <h1 class="fs-4 me-auto">Анализ производительности приложений</h1>
+          <div class="last-updated text-muted small"></div>
+          <button id="refreshBtn" class="btn btn-outline-primary ms-3 btn-sm">
+            <i class="bi bi-arrow-clockwise"></i> Обновить
+          </button>
+        </div>
+      </header>
+
+      <!-- Блок ключевых показателей скрыт стилем в CSS -->
+      <div class="row mb-3" style="display: none">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">Ключевые показатели</h5>
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="group-by-type"
+                  checked
+                />
+                <label class="form-check-label" for="group-by-type"
+                  >Группировка по типу</label
+                >
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="key-metrics-container" class="row"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">
+                RPS при глубине 1 (базовая производительность)
+              </h5>
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="log-scale-rps"
+                  checked
+                />
+                <label class="form-check-label" for="log-scale-rps"
+                  >Лог. шкала</label
+                >
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="baseRpsChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">
+                Максимальная глубина при разной параллельности
+              </h5>
+              <div class="btn-group btn-group-sm">
+                <button
+                  class="btn btn-outline-secondary active"
+                  data-type="java"
+                >
+                  Java
+                </button>
+                <button class="btn btn-outline-secondary" data-type="go">
+                  Go
+                </button>
+                <button class="btn btn-outline-secondary" data-type="graalvm">
+                  GraalVM
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="maxDepthChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">Пропускная способность vs Время отклика</h5>
+              <select
+                id="parallel-selector"
+                class="form-select form-select-sm"
+                style="width: auto"
+              >
+                <option value="32">Параллельность: 32</option>
+                <option value="128">Параллельность: 128</option>
+                <option value="512">Параллельность: 512</option>
+                <option value="2048">Параллельность: 2048</option>
+              </select>
+            </div>
+            <div class="card-body">
+              <canvas id="rpsVsLatencyChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">Потребление ресурсов (память/CPU)</h5>
+              <select
+                id="resource-depth-selector"
+                class="form-select form-select-sm"
+                style="width: auto"
+              >
+                <option value="1">Глубина: 1</option>
+                <option value="16">Глубина: 16</option>
+                <option value="32">Глубина: 32</option>
+              </select>
+            </div>
+            <div class="card-body">
+              <canvas id="resourceUsageChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">Аномалии и интересные наблюдения</h5>
+            </div>
+            <div class="card-body py-2">
+              <div id="anomalies-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">Тепловая карта производительности</h5>
+              <div class="d-flex gap-2">
+                <select id="heatmap-metric" class="form-select form-select-sm">
+                  <option value="RPS">RPS</option>
+                  <option value="Среднее_время_мс">Среднее время (мс)</option>
+                  <option value="P99_мс">P99 (мс)</option>
+                  <option value="Среднее_CPU">Среднее CPU</option>
+                  <option value="Средняя_память_МБ">Средняя память (МБ)</option>
+                  <option value="Запросы_неудачные">Неудачные запросы</option>
+                </select>
+                <select
+                  id="heatmap-app-type"
+                  class="form-select form-select-sm"
+                >
+                  <option value="all">Все типы</option>
+                  <option value="java">Java</option>
+                  <option value="go">Go</option>
+                  <option value="graalvm">GraalVM</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="heatmapContainer" style="height: 500px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">Таблица результатов</h5>
+              <div class="d-flex gap-2">
+                <select
+                  id="table-filter-app"
+                  class="form-select form-select-sm"
+                >
+                  <option value="all">Все приложения</option>
+                </select>
+                <select
+                  id="table-filter-parallel"
+                  class="form-select form-select-sm"
+                >
+                  <option value="all">Все параллельности</option>
+                </select>
+                <button
+                  id="toggle-columns-btn"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  <i class="bi bi-columns"></i> Колонки
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table
+                  id="resultsTable"
+                  class="table table-sm table-striped table-hover"
+                  style="width: 100%"
+                >
+                  <thead>
+                    <tr>
+                      <th>Приложение</th>
+                      <th>Паралл.</th>
+                      <th>Глубина</th>
+                      <th>RPS</th>
+                      <th>Ср. время (мс)</th>
+                      <th>P99 (мс)</th>
+                      <th>Запросы всего</th>
+                      <th>Успешные</th>
+                      <th>Неудачные</th>
+                      <th>Ср. CPU</th>
+                      <th>Ср. память (МБ)</th>
+                      <th>Время запуска (с)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Данные будут добавлены динамически -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="py-2 mt-2 border-top">
+      <div class="container text-center text-muted small">
+        <span>Май 2025 - Анализатор производительности</span>
+      </div>
+    </footer>
+
+    <!-- Модальное окно для настройки колонок -->
+    <div class="modal fade" id="columnsModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Настройка колонок</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div id="column-toggles" class="d-flex flex-column gap-2">
+              <!-- Колонки будут добавлены динамически -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Закрыть
+            </button>
+            <button type="button" class="btn btn-primary" id="apply-columns">
+              Применить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/public/app.js"></script>
+  </body>
+</html>
